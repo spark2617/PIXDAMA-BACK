@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import 'dotenv/config';
+
 
 // Make sure to add JWT_SECRET to your .env file
 if (!process.env.JWT_SECRET || !process.env.JWT_EXPIRES_IN) {

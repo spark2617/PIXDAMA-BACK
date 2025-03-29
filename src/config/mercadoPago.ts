@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-console.log(process.env.MERCADO_PAGO_ACCESS_TOKEN)
+// console.log(process.env.MERCADO_PAGO_ACCESS_TOKEN)
 
 
 const mercadoPagoClient = new MercadoPagoConfig({
