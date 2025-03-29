@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../config/supabase';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 

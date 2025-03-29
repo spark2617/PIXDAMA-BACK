@@ -11,4 +11,7 @@ userRouter.post('/signin', signInSchema, validateRequest, userController.signIn)
 userRouter.get('/session', authMiddleware, userController.getSession);
 userRouter.post('/signout', authMiddleware, userController.signOut);
 
+//   Stripe
+// userRouter.post("/gerar-pix", gerarPix);
+// userRouter.post("/webhook", webhook);
 export default userRouter;

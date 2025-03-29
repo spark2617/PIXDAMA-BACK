@@ -1,6 +1,6 @@
 import { checkSchema } from 'express-validator';
 
-const validateCPF = (cpf: string) => {
+export const validateCPF = (cpf: string) => {
     cpf = cpf.replace(/[^\d]/g, '');
 
     if (cpf.length !== 11) return false;

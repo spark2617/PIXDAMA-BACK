@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRoutes';
 
+import paymentRouter from "./routes/paymentRoutes";
+
+
 const cors = require('cors');
 
 dotenv.config();
@@ -24,6 +27,7 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/users', userRouter);
+app.use("/api", paymentRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Hello World!");
