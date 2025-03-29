@@ -3,8 +3,8 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-console.log(process.env.SUPABASE_URL)
-console.log(process.env.SUPABASE_KEY)
+// console.log(process.env.SUPABASE_URL)
+// console.log(process.env.SUPABASE_KEY)
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
     throw new Error('Missing Supabase environment variables')

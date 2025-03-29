@@ -6,6 +6,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+console.log(process.env.JWT_EXPIRES_IN)
+console.log(process.env.JWT_SECRET)
+
 // Make sure to add JWT_SECRET to your .env file
 if (!process.env.JWT_SECRET || !process.env.JWT_EXPIRES_IN) {
     throw new Error('JWT_SECRET is not defined in environment variables');
