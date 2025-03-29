@@ -35,5 +35,5 @@ export const createPayment = async (req: Request, res: Response) => {
 
 export const webhookHandler = async (req: Request, res: Response) => {
     console.log("🔔 Webhook recebido:", req.body);
-    res.status(200)
+    res.status(200).send("recebido")
   };
