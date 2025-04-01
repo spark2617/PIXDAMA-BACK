@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
-import { body } from 'express-validator';
 import { v4 as uuidv4 } from 'uuid';
 import { createCashOut, createTransaction } from '../connectionPay/paymentsService';
 import { createCashInSupabase, findCashInByExternal_id, updateCashInSupabase } from '../supabase/cashIn.supabase';
-import { error } from 'console';
 import { verifyIP } from '../utils/ValidationWebHook';
 import { createCashOutSupabase } from '../supabase/cashOut.supabase';
 import { findWalletByUserId, updateBalance } from '../supabase/wallet.supabase';
-import { date } from 'zod';
+
 
 export const cashIn = async (req: Request, res: Response) => {
     try {
@@ -64,7 +62,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
             res.status(400).json({ error: "Missing required fields" });
             return; 
         }
-
+        console.log("webhook")
         
         const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
 
@@ -85,7 +83,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
         }
 
         const { iduser, amount }:any = cashInSupabase.data;
-
+        console.log("amount: " + amount)
         const balanceError = await updateBalance(iduser, amount);
         
         if (!balanceError) {
