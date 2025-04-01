@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createCashOut, createTransaction } from '../connectionPay/paymentsService';
 import { createCashInSupabase, findCashInByExternal_id, updateCashInSupabase } from '../supabase/cashIn.supabase';
 import { error } from 'console';
-import { isSignatureValid } from '../utils/ValidationWebHook';
+import { verifyIP } from '../utils/ValidationWebHook';
 import { createCashOutSupabase } from '../supabase/cashOut.supabase';
 import { findWalletByUserId, updateBalance } from '../supabase/wallet.supabase';
 import { date } from 'zod';
@@ -39,6 +39,8 @@ export const cashIn = async (req: Request, res: Response) => {
             throw new Error("Failed to save cash-in data");
         }
 
+        updateBalance(user.userId,amount)
+
         res.status(201).json({ ...cashIn, pix: response.pix.payload });
     } catch (error) {
         console.error("Error creating payment:", error);
@@ -50,20 +52,18 @@ export const cashIn = async (req: Request, res: Response) => {
 
 export const webhookHandler = async (req: Request, res: Response) => {
     try {
+        
+        if (!verifyIP(req)) {
+            res.status(403).json({ error: "Acesso não autorizado" });
+            return
+          }
+
         const { external_id, status } = req.body;
 
         if (!external_id || !status) {
             res.status(400).json({ error: "Missing required fields" });
             return; 
         }
-
-       
-        if (!isSignatureValid(req, res)) {
-            res.status(403).json({ error: "Invalid signature" });
-            console.log("assinatura invalida")
-            return; 
-        }
-        
 
         
         const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
@@ -125,16 +125,16 @@ export const cashOut = async (req: Request, res: Response) => {
         const response = await createCashOut(pix_key, pix_type, amount);
 
         if (response.hasError) {
-            console.error("❌ Erro ao criar Cash Out:", response.error);
+            console.error("Erro ao criar Cash Out:", response.error);
             res.status(400).json({ error: response.error });
             return;
         }
 
 
-        const { data, error } = await createCashOutSupabase(response.id, amount, user.userId, response.status);
+        const { data, error } = await createCashOutSupabase(amount, user.userId);
 
         if (error) {
-            console.error("❌ Erro ao criar Cash In:", error);
+            console.error("Erro ao criar Cash In:", error);
             res.status(500).json({ error: "Failed to create Cash In" });
             return;
         }
