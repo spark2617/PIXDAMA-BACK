@@ -9,7 +9,7 @@ export async function createTransaction(externalId: string, amount: number, ip: 
         external_id: externalId,
         total_amount: amount,
         payment_method: "PIX",
-        webhook_url: "https://pixdama-4795.onrender.com",
+        webhook_url: "https://pixdama-4795.onrender.com/api/webhook",
         items: [
             {
                 id: "deposit",
