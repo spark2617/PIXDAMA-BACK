@@ -1,4 +1,5 @@
-import { MercadoPagoConfig, Payment } from "mercadopago";
+import { MercadoPagoConfig, Payment} from "mercadopago";
+
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,5 +13,4 @@ const mercadoPagoClient = new MercadoPagoConfig({
 });
 
 const payment = new Payment(mercadoPagoClient);
-
 export { payment };

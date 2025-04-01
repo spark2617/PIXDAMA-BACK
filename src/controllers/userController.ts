@@ -3,11 +3,13 @@ import { supabase } from '../config/supabase';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { createUserSupabase, findUserByEmail, findUserIdByid } from '../supabase/user.supabase';
+import { createWalletSupabase } from '../supabase/wallet.supabase';
 
 dotenv.config();
 
-console.log(process.env.JWT_EXPIRES_IN)
-console.log(process.env.JWT_SECRET)
+// console.log(process.env.JWT_EXPIRES_IN)
+// console.log(process.env.JWT_SECRET)
 
 // Make sure to add JWT_SECRET to your .env file
 if (!process.env.JWT_SECRET || !process.env.JWT_EXPIRES_IN) {
@@ -20,14 +22,10 @@ const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN;
 export const userController = {
     async signUp(req: Request, res: Response): Promise<any> {
         try {
-            const { name, email, password, cpf, birthdate } = req.body;
+            const { name, email, password, cpf, birthdate, confirmou_dados, confirmou_idade, aceitou_termos } = req.body;
 
             // Check if user already exists
-            const { data: existingUser } = await supabase
-                .from('users')
-                .select('*')
-                .eq('email', email)
-                .single();
+            const { data: existingUser } = await findUserByEmail(email)
 
             if (existingUser) {
                 return res.status(400).json({
@@ -40,29 +38,24 @@ export const userController = {
             const hashedPassword = await bcrypt.hash(password, 10);
 
             // Insert new user
-            const { data, error } = await supabase
-                .from('users')
-                .insert([
-                    {
-                        name,
-                        email,
-                        password: hashedPassword,
-                        cpf: cpf,
-                        birthdate: birthdate
-                    }
-                ])
-                .select()
-                .single();
+            const { data: user, error: userError } = await createUserSupabase(name, email, hashedPassword, cpf, birthdate, confirmou_dados, confirmou_idade, aceitou_termos,)
 
-            if (error) throw error;
+            if (userError) throw userError;
+
+            // Create wallet for the new user
+            const { data: wallet, error: walletError } = await createWalletSupabase(user.id)
+            if (walletError) throw walletError;
 
             // Remove password from response
-            const { password: _, ...userWithoutPassword } = data;
+            const { password: _, ...userWithoutPassword } = user;
 
             return res.status(201).json({
                 success: true,
                 message: 'Registration successful',
-                data: userWithoutPassword
+                data: {
+                    user: userWithoutPassword,
+                    wallet: wallet
+                }
             });
         } catch (error: any) {
             return res.status(500).json({
@@ -70,6 +63,7 @@ export const userController = {
                 message: error.message
             });
         }
+
     },
 
     async signIn(req: Request, res: Response): Promise<any> {
@@ -77,11 +71,7 @@ export const userController = {
             const { email, password } = req.body;
 
             // Get user by email
-            const { data: user, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('email', email)
-                .single();
+            const { data: user, error } = await findUserByEmail(email);
 
             if (error || !user) {
                 return res.status(401).json({
@@ -102,8 +92,9 @@ export const userController = {
 
             // Generate JWT token
             const token = jwt.sign(
-                { 
+                {
                     userId: user.id,
+                    name: user.name,
                     email: user.email,
                     cpf: user.cpf
                 },
@@ -165,11 +156,7 @@ export const userController = {
             const { userId } = req.user!;
 
             // Fetch user data from database
-            const { data: userData, error } = await supabase
-                .from('users')
-                .select('name, email, profile, totalWins, birthdate')
-                .eq('id', userId)
-                .single();
+            const { data: userData, error } = await findUserIdByid(userId);
 
             if (error) throw error;
 

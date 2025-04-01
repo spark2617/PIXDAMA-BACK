@@ -15,19 +15,26 @@ export const updateBalance = async (userId: number, amount: number) => {
 };
 
 
-export const findUserIdByEmailAndCpf = async (email: string, cpf: string) => {
+export const createWalletSupabase = async (user_id: number | string) => {
   const { data, error } = await supabase
-    .from("user") 
-    .select("id")
-    .eq("email", email)
-    .eq("cpf", cpf)
-    .maybeSingle();
+    .from('wallet')
+    .insert([
+      {
+        iduser: user_id,
+      }
+    ])
+    .select()
+    .single();
 
-  if (error) {
-    console.error("Erro ao buscar o usuário:", error.message);
-    return null;
-  }
+  return { data, error }
+}
 
-  return data?.id;
-};
+export const findWalletByUserId = async (user_id: number | string) => {
+  const { data, error } = await supabase
+    .from('wallet')
+    .select()
+    .eq("iduser", user_id)
+    .single();
 
+  return { data, error }
+}
