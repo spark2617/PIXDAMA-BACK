@@ -86,10 +86,9 @@ export const webhookHandler = async (req: Request, res: Response) => {
 
         const { iduser, amount }:any = cashInSupabase.data;
 
-        
         const balanceError = await updateBalance(iduser, amount);
         
-        if (balanceError) {
+        if (!balanceError) {
             console.error("Erro ao atualizar saldo:", balanceError);
             res.status(500).json({ error: "Failed to update balance" });
             return;

@@ -23,6 +23,7 @@ export const updateCashInSupabase = async (external_id: string, status: string) 
             status,
         })
         .eq("external_id", external_id)
+        .single();
 
     return { data, error }
 }
@@ -32,6 +33,7 @@ export const findCashInByExternal_id = async (external_id:string) => {
         .from("cash_in")
         .select()
         .eq("external_id", external_id)
+        .single();
 
     return { data, error }
 }
