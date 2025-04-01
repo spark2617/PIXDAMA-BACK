@@ -69,7 +69,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
         const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
 
         if (cashInError) {
-            console.error("❌ Erro ao atualizar cash-in no Supabase:", cashInError);
+            console.error("Erro ao atualizar cash-in no Supabase:", cashInError);
             res.status(500).json({ error: "Failed to update cash-in data" });
             return;
         }
@@ -79,7 +79,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
         const cashInSupabase = await findCashInByExternal_id(external_id);
 
         if (!cashInSupabase.data) {
-            console.error("❌ Erro: Cash In não encontrado.");
+            console.error("Erro: Cash In não encontrado.");
             res.status(404).json({ error: "Cash In not found" });
             return;
         }
