@@ -8,6 +8,7 @@ const SECRET = process.env.ACCESS_TOKEN as string
 
 export const isSignatureValid = (req:Request, res:Response)=>{
     const signature = req.headers["x-signature"] as string;
+    console.log("header: "+req.headers)
     const payload = JSON.stringify(req.body);
     console.log(signature)
     // Calcula a assinatura esperada

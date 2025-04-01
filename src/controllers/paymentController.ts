@@ -116,7 +116,7 @@ export const cashOut = async (req: Request, res: Response) => {
         const wallet = await findWalletByUserId(user.userId);
 
         if (!wallet || !wallet.data || wallet.data.balance < amount) {
-            console.error("❌ Saldo insuficiente.");
+            console.error("Saldo insuficiente.");
             res.status(400).json({ error: "Insufficient balance" });
             return;
         }
@@ -140,10 +140,10 @@ export const cashOut = async (req: Request, res: Response) => {
         }
 
 
-        const balanceError = await updateBalance(user.userId, -amount);
+        const balanceError = await updateBalance(user.userId, -(amount));
 
-        if (balanceError) {
-            console.error("❌ Erro ao atualizar saldo:", balanceError);
+        if (!balanceError) {
+            console.error("Erro ao atualizar saldo:", balanceError);
             res.status(500).json({ error: "Failed to update balance" });
             return;
         }
@@ -156,7 +156,7 @@ export const cashOut = async (req: Request, res: Response) => {
         });
 
     } catch (error) {
-        console.error("❌ Erro no cashOut:", error);
+        console.error("Erro no cashOut:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };

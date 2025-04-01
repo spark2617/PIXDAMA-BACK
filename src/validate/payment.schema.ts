@@ -6,7 +6,7 @@ export const createCashinSchema = checkSchema({
         notEmpty: {
             errorMessage: "Amount is required",
         },
-        isInt: {
+        isFloat: {
             options: { gt: 0 },
             errorMessage: "The value must be an integer"
         }
@@ -28,7 +28,7 @@ export const createCashOutSchema = checkSchema({
         notEmpty: {
             errorMessage: "Amount is required",
         },
-        isInt: {
+        isFloat: {
             options: { gt: 0 },
             errorMessage: "The value must be an integer"
         }
