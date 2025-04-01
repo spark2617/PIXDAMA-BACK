@@ -60,8 +60,10 @@ export const webhookHandler = async (req: Request, res: Response) => {
        
         if (!isSignatureValid(req, res)) {
             res.status(403).json({ error: "Invalid signature" });
+            console.log("assinatura invalida")
             return; 
         }
+        
 
         
         const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
