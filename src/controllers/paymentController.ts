@@ -37,8 +37,6 @@ export const cashIn = async (req: Request, res: Response) => {
             throw new Error("Failed to save cash-in data");
         }
 
-        updateWalletBalance(user.userId,amount)
-
         res.status(201).json({ ...cashIn, pix: response.pix.payload });
     } catch (error) {
         console.error("Error creating payment:", error);
@@ -130,8 +128,8 @@ export const cashOut = async (req: Request, res: Response) => {
         const { data, error } = await createCashOutSupabase(amount, user.userId);
 
         if (error) {
-            console.error("Erro ao criar Cash In:", error);
-            res.status(500).json({ error: "Failed to create Cash In" });
+            console.error("Erro ao criar Cash out:", error);
+            res.status(500).json({ error: "Failed to create Cash out" });
             return;
         }
 
