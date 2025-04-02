@@ -87,7 +87,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
 
         const { iduser, amount }: any = cashInSupabase.data;
 
-        const transaction = await TransactionService.registerTransaction({
+        await TransactionService.registerTransaction({
             user_id: iduser,
             value: amount,
             type: "Deposito",
