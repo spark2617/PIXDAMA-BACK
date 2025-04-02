@@ -47,7 +47,6 @@ export const cashIn = async (req: Request, res: Response) => {
 };
 
 
-
 export const webhookHandler = async (req: Request, res: Response) => {
     try {
         
@@ -62,7 +61,6 @@ export const webhookHandler = async (req: Request, res: Response) => {
             res.status(400).json({ error: "Missing required fields" });
             return; 
         }
-        console.log("webhook")
         
         const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
 
@@ -83,7 +81,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
         }
 
         const { iduser, amount }:any = cashInSupabase.data;
-        console.log("amount: " + amount)
+        
         const balanceError = await updateBalance(iduser, amount);
         
         if (!balanceError) {

@@ -1,18 +1,26 @@
 import { supabase } from "../config/supabase";
 
-export const updateBalance = async (userId: number, amount: number) => {
-  const { data, error } = await supabase.rpc('update_balance', {
-    user_id: userId,
-    amount: amount
-  });
 
-  if (error) {
-    console.error('Erro ao atualizar saldo:', error.message);
-    return { error: error.message };
+export const updateBalance = async (userId: string | number, amount: number) => {
+  try {
+    const { data, error } = await supabase
+      .from('wallet')
+      .update({ balance: amount })
+      .eq('iduser', userId)
+      .select();
+
+    if (error) {
+      console.error('Erro ao atualizar saldo:', error.message);
+      return { error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err) {
+    console.error('Erro inesperado:', err);
+    return { error: 'Erro interno do servidor' };
   }
-
-  return { success: true, data };
 };
+
 
 
 export const createWalletSupabase = async (user_id: number | string) => {
