@@ -7,7 +7,8 @@ export const createCashInSupabase = async (external_id: string, amount: number, 
             {
                 external_id,
                 amount,
-                iduser: user_id
+                iduser: user_id,
+                
             }
         ])
         .select()

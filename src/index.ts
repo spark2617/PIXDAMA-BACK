@@ -27,7 +27,7 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/users', userRouter);
-app.use("/api", paymentRouter);
+app.use("/api/payments", paymentRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Hello World!");

@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createCashOut, createTransaction } from '../connectionPay/paymentsService';
 import { createCashInSupabase, findCashInByExternal_id, updateCashInSupabase } from '../supabase/cashIn.supabase';
 import { verifyIP } from '../utils/ValidationWebHook';
-import { createCashOutSupabase } from '../supabase/cashOut.supabase';
-import { findWalletByUserId, updateWalletBalance } from '../supabase/wallet.supabase';
+import { getBalancetByUserId, getWalletByUserId, updateWalletBalance } from '../supabase/wallet.supabase';
+import { TransactionService } from '../service/historyTransaction';
 
 
 export const cashIn = async (req: Request, res: Response) => {
@@ -47,19 +47,28 @@ export const cashIn = async (req: Request, res: Response) => {
 
 export const webhookHandler = async (req: Request, res: Response) => {
     try {
-        
+
         if (!verifyIP(req)) {
             res.status(403).json({ error: "Acesso não autorizado" });
             return
-          }
+        }
 
         const { external_id, status } = req.body;
 
         if (!external_id || !status) {
             res.status(400).json({ error: "Missing required fields" });
-            return; 
+            return;
         }
-        
+
+        const getCash_in = await findCashInByExternal_id(external_id)
+
+        if(getCash_in.data.status === "AUTHORIZED"){
+            res.status(200).json({
+                success: true,
+                status: "OK",
+            });
+            return
+        }
         const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
 
         if (cashInError) {
@@ -67,8 +76,6 @@ export const webhookHandler = async (req: Request, res: Response) => {
             res.status(500).json({ error: "Failed to update cash-in data" });
             return;
         }
-
-    
 
         const cashInSupabase = await findCashInByExternal_id(external_id);
 
@@ -78,17 +85,14 @@ export const webhookHandler = async (req: Request, res: Response) => {
             return;
         }
 
-        const { iduser, amount }:any = cashInSupabase.data;
-        
-        const balanceError = await updateWalletBalance(iduser, amount);
-        
-        if (!balanceError) {
-            console.error("Erro ao atualizar saldo:", balanceError);
-            res.status(500).json({ error: "Failed to update balance" });
-            return;
-        }
+        const { iduser, amount }: any = cashInSupabase.data;
 
-        
+        const transaction = await TransactionService.registerTransaction({
+            user_id: iduser,
+            value: amount,
+            type: "Deposito",
+        });
+
         res.status(200).json({
             success: true,
             status: "OK",
@@ -107,14 +111,13 @@ export const cashOut = async (req: Request, res: Response) => {
         const user = (req as any).user;
 
 
-        const wallet = await findWalletByUserId(user.userId);
+        const wallet = await getWalletByUserId(user.userId);
 
-        if (!wallet || !wallet.data || wallet.data.balance < amount) {
+        if (!wallet || wallet.balance < amount) {
             console.error("Saldo insuficiente.");
-            res.status(400).json({ error: "Insufficient balance" });
+            res.status(400).json({ error: "Saldo insuficiente na carteira" });
             return;
         }
-
 
         const response = await createCashOut(pix_key, pix_type, amount);
 
@@ -123,16 +126,6 @@ export const cashOut = async (req: Request, res: Response) => {
             res.status(400).json({ error: response.error });
             return;
         }
-
-
-        const { data, error } = await createCashOutSupabase(amount, user.userId);
-
-        if (error) {
-            console.error("Erro ao criar Cash out:", error);
-            res.status(500).json({ error: "Failed to create Cash out" });
-            return;
-        }
-
 
         const balanceError = await updateWalletBalance(user.userId, -(amount));
 
@@ -145,8 +138,7 @@ export const cashOut = async (req: Request, res: Response) => {
 
         res.status(200).json({
             success: true,
-            message: "Cash Out and Cash In created successfully",
-            data: data,
+            message: "Cash Out created successfully",
         });
 
     } catch (error) {
@@ -156,3 +148,32 @@ export const cashOut = async (req: Request, res: Response) => {
 };
 
 
+export const getUserTransactions = async (req: Request, res: Response) => {
+    try {
+        const user = (req as any).user;
+        const transactions = await TransactionService.findTransactionByIdUser(user.userId);
+
+        // if (transactions.length === 0) {
+        //     res.status(404).json({ message: "No transactions found for this user." });
+        //     return
+        // }
+
+        res.status(200).json(transactions);
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getBalance = async (req: Request, res: Response) => {
+    try {
+        const user = (req as any).user; 
+
+        const balance = await getBalancetByUserId(user.userId);
+
+        res.status(200).json(balance);
+    } catch (error) {
+        console.error("Erro ao buscar saldo:", error);
+        res.status(500).json({ error: "Erro interno do servidor" });
+    }
+};
