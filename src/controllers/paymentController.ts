@@ -4,7 +4,7 @@ import { createCashOut, createTransaction } from '../connectionPay/paymentsServi
 import { createCashInSupabase, findCashInByExternal_id, updateCashInSupabase } from '../supabase/cashIn.supabase';
 import { verifyIP } from '../utils/ValidationWebHook';
 import { createCashOutSupabase } from '../supabase/cashOut.supabase';
-import { findWalletByUserId, updateBalance } from '../supabase/wallet.supabase';
+import { findWalletByUserId, updateWalletBalance } from '../supabase/wallet.supabase';
 
 
 export const cashIn = async (req: Request, res: Response) => {
@@ -37,7 +37,7 @@ export const cashIn = async (req: Request, res: Response) => {
             throw new Error("Failed to save cash-in data");
         }
 
-        updateBalance(user.userId,amount)
+        updateWalletBalance(user.userId,amount)
 
         res.status(201).json({ ...cashIn, pix: response.pix.payload });
     } catch (error) {
@@ -82,7 +82,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
 
         const { iduser, amount }:any = cashInSupabase.data;
         
-        const balanceError = await updateBalance(iduser, amount);
+        const balanceError = await updateWalletBalance(iduser, amount);
         
         if (!balanceError) {
             console.error("Erro ao atualizar saldo:", balanceError);
@@ -136,7 +136,7 @@ export const cashOut = async (req: Request, res: Response) => {
         }
 
 
-        const balanceError = await updateBalance(user.userId, -(amount));
+        const balanceError = await updateWalletBalance(user.userId, -(amount));
 
         if (!balanceError) {
             console.error("Erro ao atualizar saldo:", balanceError);

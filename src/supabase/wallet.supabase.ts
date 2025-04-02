@@ -1,11 +1,23 @@
 import { supabase } from "../config/supabase";
 
 
-export const updateBalance = async (userId: string | number, amount: number) => {
+export async function updateWalletBalance(userId:string | number, amount: number) {
   try {
+    // Buscar o saldo atual do usuário
+    const { data: userWallet, error: fetchError } = await findWalletByUserId(userId)
+
+    if (fetchError) {
+      console.error('Erro ao buscar saldo:', fetchError.message);
+      return { error: fetchError.message };
+    }
+
+    
+    const newBalance = userWallet.balance + amount;
+
+    
     const { data, error } = await supabase
       .from('wallet')
-      .update({ balance: amount })
+      .update({ balance: newBalance })
       .eq('iduser', userId)
       .select();
 
@@ -19,9 +31,7 @@ export const updateBalance = async (userId: string | number, amount: number) => 
     console.error('Erro inesperado:', err);
     return { error: 'Erro interno do servidor' };
   }
-};
-
-
+}
 
 export const createWalletSupabase = async (user_id: number | string) => {
   const { data, error } = await supabase
