@@ -4,7 +4,7 @@ import { createCashOut, createTransaction } from '../connectionPay/paymentsServi
 import { createCashInSupabase, findCashInByExternal_id, updateCashInSupabase } from '../supabase/cashIn.supabase';
 import { verifyIP } from '../utils/ValidationWebHook';
 import { getBalancetByUserId, getWalletByUserId, updateWalletBalance } from '../supabase/wallet.supabase';
-import { TransactionService } from '../service/historyTransaction';
+import { getTransactionsByUserId, registerTransaction } from '../supabase/historyTransaction';
 
 
 export const cashIn = async (req: Request, res: Response) => {
@@ -76,7 +76,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
             return;
         }
 
-        if(cashInSupabase.data.status === "AUTHORIZED"){
+        if (cashInSupabase.data.status === "AUTHORIZED") {
             res.status(200).json({
                 success: true,
                 status: "OK",
@@ -86,11 +86,14 @@ export const webhookHandler = async (req: Request, res: Response) => {
 
         const { iduser, amount }: any = cashInSupabase.data;
 
-        await TransactionService.registerTransaction({
-            user_id: iduser,
-            value: amount,
-            type: "Deposito",
-        });
+        await registerTransaction(iduser, amount, "Deposito",);
+
+        
+        const wallet = await getWalletByUserId(iduser)
+
+        const newBalance = wallet.balance + amount
+
+        const balance = await updateWalletBalance(iduser, newBalance);
 
         res.status(200).json({
             success: true,
@@ -126,13 +129,10 @@ export const cashOut = async (req: Request, res: Response) => {
             return;
         }
 
-        const balanceError = await updateWalletBalance(user.userId, -(amount));
+        const newBalance = wallet.balance - amount
 
-        if (!balanceError) {
-            console.error("Erro ao atualizar saldo:", balanceError);
-            res.status(500).json({ error: "Failed to update balance" });
-            return;
-        }
+        const balance = await updateWalletBalance(user.userId, newBalance);
+
 
 
         res.status(200).json({
@@ -150,12 +150,7 @@ export const cashOut = async (req: Request, res: Response) => {
 export const getUserTransactions = async (req: Request, res: Response) => {
     try {
         const user = (req as any).user;
-        const transactions = await TransactionService.findTransactionByIdUser(user.userId);
-
-        // if (transactions.length === 0) {
-        //     res.status(404).json({ message: "No transactions found for this user." });
-        //     return
-        // }
+        const transactions = await getTransactionsByUserId(user.userId);
 
         res.status(200).json(transactions);
     } catch (error) {
@@ -166,7 +161,7 @@ export const getUserTransactions = async (req: Request, res: Response) => {
 
 export const getBalance = async (req: Request, res: Response) => {
     try {
-        const user = (req as any).user; 
+        const user = (req as any).user;
 
         const balance = await getBalancetByUserId(user.userId);
 
