@@ -2,22 +2,36 @@ import { supabase } from "../config/supabase";
 
 
 
-export const registerTransaction = async (user_id: string | number, value: number, type:'Deposito' | 'Saque') => {
-    const { data, error } = await supabase
-        .from('history_transactions')
-        .insert({ user_id, value, type })
-        .select('*');
+export const registerTransaction = async (
+    user_id: string | number, 
+    value: number, 
+    type: 'Deposito' | 'Saque', 
+    balance: number
+) => {
+    try {
+        const { data, error } = await supabase
+            .from('history_transactions')
+            .insert([{ user_id, value, type, balance }])
+            .select()
+            .single();
 
-    if (error) {
-        throw new Error(`Error inserting transaction: ${error.message}`);
+        if (error) {
+            console.error("Erro ao registrar transação:", error.message);
+            return null; 
+        }
+        
+
+        return data;
+    } catch (err) {
+        console.error("Erro inesperado ao registrar transação:", err);
+        return null;
     }
-
-    return data;
 };
+
 
 export const getTransactionsByUserId = async (user_id: string | number) => {
     const { data, error } = await supabase
-        .from('history_transations')
+        .from('history_transactions')
         .select('*')
         .eq('user_id', user_id);
 

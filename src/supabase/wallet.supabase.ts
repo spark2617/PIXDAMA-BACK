@@ -47,7 +47,5 @@ export const getBalancetByUserId = async (user_id: number | string) => {
     .select("balance")
     .eq("iduser", user_id)
     .single();
-
-    console.log(data)
   return data
 }

@@ -85,16 +85,17 @@ export const webhookHandler = async (req: Request, res: Response) => {
             return;
         }
 
-        const { iduser, amount }: any = cashInSupabase.data;
+        const { iduser, amount } = cashInSupabase.data;
 
-        await registerTransaction(iduser, amount, "Deposito",);
-
-        
+    
         const wallet = await getWalletByUserId(iduser)
 
+        
         const newBalance = wallet.balance + amount
-
+        
         const balance = await updateWalletBalance(iduser, newBalance);
+        
+        await registerTransaction(iduser, amount, "Deposito",newBalance);
 
         res.status(200).json({
             success: true,
@@ -134,7 +135,7 @@ export const cashOut = async (req: Request, res: Response) => {
 
         const balance = await updateWalletBalance(user.userId, newBalance);
 
-
+        await registerTransaction(user.userId, amount, "Saque",newBalance);
 
         res.status(200).json({
             success: true,
