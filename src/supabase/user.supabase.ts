@@ -49,3 +49,4 @@ export const createUserSupabase = async (name: string, email: string, password: 
 
         return {data, error}
 }
+

@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import userRouter from './routes/userRoutes';
 
 import paymentRouter from "./routes/paymentRoutes";
+import adminRouter from "./routes/adminRoutes";
 
 
 const cors = require('cors');
@@ -28,6 +29,7 @@ app.use(cookieParser());
 // Routes
 app.use('/api/users', userRouter);
 app.use("/api/payments", paymentRouter);
+app.use("/api/admin", adminRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Hello World!");

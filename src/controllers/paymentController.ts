@@ -177,3 +177,4 @@ export const getBalance = async (req: Request, res: Response) => {
         res.status(500).json({ error: "Erro interno do servidor" });
     }
 };
+
