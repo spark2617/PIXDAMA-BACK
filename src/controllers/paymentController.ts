@@ -55,16 +55,9 @@ export const webhookHandler = async (req: Request, res: Response) => {
 
         const { external_id, status } = req.body;
 
+
         if (!external_id || !status) {
             res.status(400).json({ error: "Missing required fields" });
-            return;
-        }
-
-        const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
-
-        if (cashInError) {
-            console.error("Erro ao atualizar cash-in no Supabase:", cashInError);
-            res.status(500).json({ error: "Failed to update cash-in data" });
             return;
         }
 
@@ -82,6 +75,14 @@ export const webhookHandler = async (req: Request, res: Response) => {
                 status: "OK",
             });
             return
+        }
+
+        const { data: cashIn, error: cashInError } = await updateCashInSupabase(external_id, status);
+
+        if (cashInError) {
+            console.error("Erro ao atualizar cash-in no Supabase:", cashInError);
+            res.status(500).json({ error: "Failed to update cash-in data" });
+            return;
         }
 
         const { iduser, amount }: any = cashInSupabase.data;
