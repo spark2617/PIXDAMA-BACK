@@ -49,6 +49,24 @@ export const userController = {
             // Remove password from response
             const { password: _, ...userWithoutPassword } = user;
 
+            const token = jwt.sign(
+                {
+                    userId: user.id,
+                    name: user.name,
+                    email: user.email,
+                    cpf: user.cpf
+                },
+                JWT_SECRET,
+                { expiresIn: JWT_EXPIRES_IN as any }
+            );
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+                sameSite: 'none',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            });
+
             return res.status(201).json({
                 success: true,
                 message: 'Registration successful',
@@ -108,7 +126,7 @@ export const userController = {
             // Set cookie
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: true, // Use secure cookies in production
+                secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
                 sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             });
