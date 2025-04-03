@@ -69,27 +69,27 @@ export const userController = {
     async signIn(req: Request, res: Response): Promise<any> {
         try {
             const { email, password } = req.body;
-
+    
             // Get user by email
             const { data: user, error } = await findUserByEmail(email);
-
+    
             if (error || !user) {
                 return res.status(401).json({
                     success: false,
                     message: 'Invalid credentials'
                 });
             }
-
+    
             // Verify password
             const isValidPassword = await bcrypt.compare(password, user.password);
-
+    
             if (!isValidPassword) {
                 return res.status(401).json({
                     success: false,
                     message: 'Invalid credentials'
                 });
             }
-
+    
             // Generate JWT token
             const token = jwt.sign(
                 {
@@ -101,21 +101,21 @@ export const userController = {
                 JWT_SECRET,
                 { expiresIn: JWT_EXPIRES_IN as any }
             );
-
+    
             // Remove password from response
             const { password: _, ...userWithoutPassword } = user;
-
-            // Set cookie
-            res.cookie('token', token, {
+    
+            // ✅ Definir o cookie corretamente para ambientes cross-origin
+            res.cookie("token", token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-                sameSite: 'strict',
-                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+                secure: true, // ⚠️ Necessário para HTTPS
+                sameSite: "None", // 🔥 Permite cookies entre domínios diferentes
+                maxAge: 24 * 60 * 60 * 1000 // 24 horas
             });
-
+    
             return res.status(200).json({
                 success: true,
-                message: 'Login successful',
+                message: "Login successful",
                 data: {
                     user: userWithoutPassword
                 }
@@ -127,6 +127,7 @@ export const userController = {
             });
         }
     },
+    
 
     async signOut(req: Request, res: Response): Promise<any> {
         try {
