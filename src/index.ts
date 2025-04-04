@@ -16,7 +16,7 @@ const port = process.env.PORT || 8080;
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 app.use(cors({
-    origin: "*",
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
