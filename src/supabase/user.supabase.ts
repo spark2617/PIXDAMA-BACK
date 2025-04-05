@@ -50,3 +50,18 @@ export const createUserSupabase = async (name: string, email: string, password: 
         return {data, error}
 }
 
+export const updateMatchAfterDeposit = async (id: string | number, quant_match_after_deposit: number) => {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ quant_match_after_deposit })
+      .eq("id", id)
+      .single();
+  
+    if (error) {
+      console.error("Erro ao atualizar quant_match_after_deposit:", error.message);
+      throw error;
+    }
+  
+    return {data, error};
+  }
+  

@@ -186,7 +186,7 @@ export const userController = {
                     email: userData.email,
                     administrador: userData.profile === "admin",
                     totalVitorias: userData.totalWins,
-                    usuarioAutenticado: true
+                    usuarioAutenticado: true,
                 }
             });
         } catch (error: any) {
@@ -196,5 +196,23 @@ export const userController = {
                 error: error.message
             });
         }
-    }
+    },
+
+    async getQuantMatchAfterDeposit(req: Request, res: Response){
+        try {
+          const userBody = (req as any).user;
+      
+          const { data: user, error } = await findUserIdByid(userBody.userId);
+      
+          if (error || !user) {
+            res.status(404).json({ error: 'Usuário não encontrado' });
+          }
+      
+        res.status(200).json({ quant_match_after_deposit: user.quant_match_after_deposit });
+        } catch (error) {
+          console.error('Erro ao buscar quant_match_after_deposit:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+      }
 };
+

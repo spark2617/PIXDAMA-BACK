@@ -5,6 +5,8 @@ import { createCashInSupabase, findCashInByExternal_id, updateCashInSupabase } f
 import { verifyIP } from '../utils/ValidationWebHook';
 import { getBalancetByUserId, getWalletByUserId, updateWalletBalance } from '../supabase/wallet.supabase';
 import { getTransactionsByUserId, registerTransaction } from '../supabase/historyTransaction';
+import { incrementMatchAfterDeposit, resetMatchAfterDeposit } from '../service/userService';
+import { findUserIdByid } from '../supabase/user.supabase';
 
 
 export const cashIn = async (req: Request, res: Response) => {
@@ -97,6 +99,8 @@ export const webhookHandler = async (req: Request, res: Response) => {
         
         await registerTransaction(iduser, amount, "Deposito",newBalance);
 
+        await resetMatchAfterDeposit(iduser)
+
         res.status(200).json({
             success: true,
             status: "OK",
@@ -121,6 +125,14 @@ export const cashOut = async (req: Request, res: Response) => {
             console.error("Saldo insuficiente.");
             res.status(400).json({ error: "Saldo insuficiente na carteira" });
             return;
+        }
+
+        const userSupabase = await findUserIdByid(user.userId)
+
+        if(userSupabase.data.quant_match_after_deposit < 5){
+            console.error("Usuario não tem 5 partidas depois do deposito");
+            res.status(400).json({ error: "Minimo 5 partidas após o deposito" });
+            return; 
         }
 
         const response = await createCashOut(pix_key, pix_type, amount);

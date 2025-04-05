@@ -9,7 +9,9 @@ const userRouter = Router();
 userRouter.post('/signup', signUpSchema, validateRequest, userController.signUp);
 userRouter.post('/signin', signInSchema, validateRequest, userController.signIn);
 userRouter.get('/session', authMiddleware, userController.getSession);
+userRouter.get('/quant-match-after-deposit', authMiddleware, userController.getQuantMatchAfterDeposit);
 userRouter.post('/signout', authMiddleware, userController.signOut);
+
 
 
 export default userRouter;
