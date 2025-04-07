@@ -4,12 +4,12 @@ dotenv.config();
 
 const token = process.env.ACCESS_TOKEN
 
-export async function createTransaction(externalId: string, amount: number, ip: string| undefined, name: string, email: string, document: string) {
+export async function createTransaction(externalId: string, amount: number, ip: string| undefined, name: string, email: string, document: string,) {
     const requestData = {
         external_id: externalId,
         total_amount: amount,
         payment_method: "PIX",
-        webhook_url: "https://pixdama-zpn6.onrender.com/api/payments/webhook",
+        webhook_url: "https://pixdama-dabt.onrender.com/api/payments/webhook",
         items: [
             {
                 id: "deposit",
