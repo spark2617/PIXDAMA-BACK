@@ -22,7 +22,6 @@ export async function resetAdminBalance(req: Request, res: Response) {
         const { error } = await supabase
             .from('wallet_admin')
             .update({ balance: 0 })
-            .limit(1)
             .eq('id', 1);
 
         if (error) {
