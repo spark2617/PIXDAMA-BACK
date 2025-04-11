@@ -6,6 +6,6 @@ import { getStatisticsController, resetAdminBalance } from "../controllers/admin
 const adminRouter = express.Router();
 
 adminRouter.get("/get-statistics", authMiddleware, getStatisticsController);
-adminRouter.put("/zerar-balance-admin", authMiddleware, resetAdminBalance);
+adminRouter.post("/zerar-balance-admin", authMiddleware, resetAdminBalance);
 
 export default adminRouter
