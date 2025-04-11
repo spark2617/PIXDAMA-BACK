@@ -7,6 +7,7 @@ import { getBalancetByUserId, getWalletByUserId, updateWalletBalance } from '../
 import { getTransactionsByUserId, registerTransaction } from '../supabase/historyTransaction';
 import { incrementMatchAfterDeposit, resetMatchAfterDeposit } from '../service/userService';
 import { findUserIdByid } from '../supabase/user.supabase';
+import { updateAdminBalance } from '../supabase/admin.supabase';
 
 
 export const cashIn = async (req: Request, res: Response) => {
@@ -89,15 +90,17 @@ export const webhookHandler = async (req: Request, res: Response) => {
 
         const { iduser, amount } = cashInSupabase.data;
 
-    
+
         const wallet = await getWalletByUserId(iduser)
 
-        
+
         const newBalance = wallet.balance + amount
-        
+
         const balance = await updateWalletBalance(iduser, newBalance);
-        
-        await registerTransaction(iduser, amount, "Deposito",newBalance);
+
+        await registerTransaction(iduser, amount, "Deposito", newBalance);
+
+        await updateAdminBalance(-(0.35 + (0.075 * amount)))
 
         await resetMatchAfterDeposit(iduser)
 
@@ -129,10 +132,10 @@ export const cashOut = async (req: Request, res: Response) => {
 
         const userSupabase = await findUserIdByid(user.userId)
 
-        if(userSupabase.data.quant_match_after_deposit < 5){
+        if (userSupabase.data.quant_match_after_deposit < 5) {
             console.error("Usuario não tem 5 partidas depois do deposito");
             res.status(400).json({ error: "Minimo 5 partidas após o deposito" });
-            return; 
+            return;
         }
 
         const response = await createCashOut(pix_key, pix_type, amount);
@@ -147,7 +150,9 @@ export const cashOut = async (req: Request, res: Response) => {
 
         const balance = await updateWalletBalance(user.userId, newBalance);
 
-        await registerTransaction(user.userId, amount, "Saque",newBalance);
+        await registerTransaction(user.userId, amount, "Saque", newBalance);
+
+        await updateAdminBalance(-(0.35 + (0.075 * amount)))
 
         res.status(200).json({
             success: true,
